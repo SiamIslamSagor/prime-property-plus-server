@@ -50,7 +50,17 @@ async function run() {
 
     ///////////     PROPERTY     //////////
 
+    // public get
+    app.get("/properties", async (req, res) => {
+      const result = await propertyCollection.find().toArray();
+      res.send(result);
+    });
     ///////////     REVIEWS     //////////
+    // public get
+    app.get("/reviews", async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result);
+    });
 
     ///////////////////////////////////////
     // Send a ping to confirm a successful connection

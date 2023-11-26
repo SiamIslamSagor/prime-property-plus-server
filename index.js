@@ -40,13 +40,40 @@ async function run() {
     const reviewCollection = client
       .db("primePropertyPulse")
       .collection("reviews");
+
     ///////////////////////////////////
     ///////////     API     //////////
     ///////////////////////////////////
 
     ///////////     JWT     //////////
 
+    // create jwt token
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "2h",
+      });
+      res.send({ token });
+    });
+
     ///////////   MY  MIDDLEWARE     //////////
+
+    // token verify middleware
+    const verifyToken = (req, res, next) => {
+      const tokenWithBearer = req.headers.authorization;
+      console.log("inside verifyToken middleware //////=>", tokenWithBearer);
+      if (!tokenWithBearer) {
+        return res.status(401).send({ message: "Unauthorized access" });
+      }
+      const token = tokenWithBearer.split(" ")[1];
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(401).send({ message: "unauthorized access" });
+        }
+        req.decodedToken = decoded;
+        next();
+      });
+    };
 
     ///////////     PROPERTY     //////////
 

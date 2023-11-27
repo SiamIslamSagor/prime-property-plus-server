@@ -121,6 +121,7 @@ async function run() {
 
     ///////////     wish LIST     //////////
 
+    // add to wish list
     app.post("/wish-list", async (req, res) => {
       const info = req.body;
       console.log("wish List info:::>", info);
@@ -133,6 +134,15 @@ async function run() {
         });
       }
       const result = await wishListCollection.insertOne(info);
+      res.send(result);
+    });
+
+    // get wish list item by user email
+    app.get("/wish-list/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { requesterEmail: email };
+      console.log(query);
+      const result = await wishListCollection.find(query).toArray();
       res.send(result);
     });
 

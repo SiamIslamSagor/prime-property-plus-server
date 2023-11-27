@@ -146,6 +146,15 @@ async function run() {
       res.send(result);
     });
 
+    // get single wish list item by wishList _id
+    app.get("/wish-list-item/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      console.log(query);
+      const result = await wishListCollection.findOne(query);
+      res.send(result);
+    });
+
     ///////////     REVIEWS     //////////
     // public get
     app.get("/reviews", async (req, res) => {

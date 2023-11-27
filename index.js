@@ -43,6 +43,10 @@ async function run() {
 
     const userCollection = client.db("primePropertyPulse").collection("users");
 
+    const wishListCollection = client
+      .db("primePropertyPulse")
+      .collection("wishList");
+
     ///////////////////////////////////
     ///////////     API     //////////
     ///////////////////////////////////
@@ -114,6 +118,24 @@ async function run() {
       const result = await propertyCollection.findOne(query);
       res.send(result);
     });
+
+    ///////////     wish LIST     //////////
+
+    app.post("/wish-list", async (req, res) => {
+      const info = req.body;
+      console.log("wish List info:::>", info);
+      const query = { propertyId: info?.propertyId };
+      console.log("checking query for wish List:::>", query);
+      const isExistInfo = await wishListCollection.findOne(query);
+      if (isExistInfo) {
+        return res.send({
+          message: "this property you have already added in you wish list.",
+        });
+      }
+      const result = await wishListCollection.insertOne(info);
+      res.send(result);
+    });
+
     ///////////     REVIEWS     //////////
     // public get
     app.get("/reviews", async (req, res) => {
@@ -122,11 +144,12 @@ async function run() {
     });
 
     ///////////////////////////////////////
+    // TODO : comment this code block
     // Send a ping to confirm a successful connection
-    /*  await client.db("admin").command({ ping: 1 });
+    await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
-    ); */
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();

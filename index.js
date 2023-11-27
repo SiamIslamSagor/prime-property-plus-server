@@ -41,6 +41,8 @@ async function run() {
       .db("primePropertyPulse")
       .collection("reviews");
 
+    const userCollection = client.db("primePropertyPulse").collection("users");
+
     ///////////////////////////////////
     ///////////     API     //////////
     ///////////////////////////////////
@@ -60,7 +62,7 @@ async function run() {
 
     // token verify middleware
     const verifyToken = (req, res, next) => {
-      const tokenWithBearer = req.headers.authorization;
+      const tokenWithBearer = req.headers.Authorization;
       console.log("inside verifyToken middleware //////=>", tokenWithBearer);
       if (!tokenWithBearer) {
         return res.status(401).send({ message: "Unauthorized access" });
@@ -74,6 +76,28 @@ async function run() {
         next();
       });
     };
+
+    ///////////     USERS     //////////
+
+    // create user
+    app.post("/users", async (req, res) => {
+      // get user email form client side
+      const user = req.body;
+      // create user email query
+      const query = { email: user.email };
+      // get user from DB
+      const isUserExist = await userCollection.findOne(query);
+      // if user already exist in DB, then return with insertedId: null
+      if (isUserExist) {
+        return res.send({
+          message: "user already exists in P P P",
+          insertedId: null,
+        });
+      }
+      // if user don't exist in DB, then insert user in DB
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
 
     ///////////     PROPERTY     //////////
 

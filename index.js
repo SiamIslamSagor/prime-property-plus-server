@@ -47,6 +47,10 @@ async function run() {
       .db("primePropertyPulse")
       .collection("wishList");
 
+    const propertyBoughtCollection = client
+      .db("primePropertyPulse")
+      .collection("propertyBought");
+
     ///////////////////////////////////
     ///////////     API     //////////
     ///////////////////////////////////
@@ -152,6 +156,16 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       console.log(query);
       const result = await wishListCollection.findOne(query);
+      res.send(result);
+    });
+
+    ///////////     PROPERTY BOUGHT     //////////
+    app.post("/property-bought", async (req, res) => {
+      const boughtPropertyInfo = req.body;
+      console.log(boughtPropertyInfo);
+      const result = await propertyBoughtCollection.insertOne(
+        boughtPropertyInfo
+      );
       res.send(result);
     });
 

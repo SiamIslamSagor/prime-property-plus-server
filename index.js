@@ -191,6 +191,19 @@ async function run() {
       res.send(result);
     });
 
+    // get single review by there title
+    app.get(
+      "/single-property-reviews/:reviewedPropertyId",
+      async (req, res) => {
+        const reviewedPropertyId = req.params.reviewedPropertyId;
+        const query = {
+          reviewedPropertyId,
+        };
+        const result = await reviewCollection.find(query).toArray();
+        res.send(result);
+      }
+    );
+
     ///////////////////////////////////////
     // TODO : comment this code block
     // Send a ping to confirm a successful connection

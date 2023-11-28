@@ -192,9 +192,19 @@ async function run() {
 
     // get single review by user email
     app.get("/reviews/:email", async (req, res) => {
+      console.log("trigged single review");
       const email = req.params.email;
       const query = { reviewerEmail: email };
       const result = await reviewCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // delete single review by user email
+    app.delete("/reviews/delete/:id", async (req, res) => {
+      console.log("trigged single delete review api");
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await reviewCollection.deleteOne(query);
       res.send(result);
     });
 

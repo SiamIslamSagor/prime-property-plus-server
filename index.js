@@ -177,6 +177,13 @@ async function run() {
     });
 
     ///////////     REVIEWS     //////////
+
+    app.post("/reviews/add", async (req, res) => {
+      const data = req.body;
+      const result = await reviewCollection.insertOne(data);
+      res.send(result);
+    });
+
     // public get
     app.get("/reviews", async (req, res) => {
       const result = await reviewCollection.find().toArray();

@@ -1,9 +1,10 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
-const app = express();
-const cors = require("cors");
 var jwt = require("jsonwebtoken");
+const cors = require("cors");
 require("dotenv").config();
+const app = express();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const port = process.env.PORT || 5000;
 
@@ -182,6 +183,27 @@ async function run() {
       const query = { buyerEmail: email };
       const result = await propertyBoughtCollection.find(query).toArray();
       res.send(result);
+    });
+
+    ///////////     PAYMENT     //////////
+
+    app.post("/create-payment-intent", async (req, res) => {
+      // get price
+      const { price } = req.body;
+      // calculate price in coin
+      const amount = parseInt(price * 100);
+
+      // create payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+
+      // send response with client secret
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
 
     ///////////     REVIEWS     //////////

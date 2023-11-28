@@ -169,10 +169,25 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/property-bought/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { buyerEmail: email };
+      const result = await propertyBoughtCollection.find(query).toArray();
+      res.send(result);
+    });
+
     ///////////     REVIEWS     //////////
     // public get
     app.get("/reviews", async (req, res) => {
       const result = await reviewCollection.find().toArray();
+      res.send(result);
+    });
+
+    // get single review by user email
+    app.get("/reviews/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { reviewerEmail: email };
+      const result = await reviewCollection.find(query).toArray();
       res.send(result);
     });
 

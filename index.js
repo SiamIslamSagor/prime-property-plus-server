@@ -159,6 +159,14 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/wish-list-item/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      console.log(query);
+      const result = await wishListCollection.deleteOne(query);
+      res.send(result);
+    });
+
     ///////////     PROPERTY BOUGHT     //////////
     app.post("/property-bought", async (req, res) => {
       const boughtPropertyInfo = req.body;

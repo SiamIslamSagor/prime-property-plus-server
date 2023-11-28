@@ -185,6 +185,34 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/bought-property/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await propertyBoughtCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.patch("/property/bought/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedData = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      console.log(updatedData, id);
+      const updatedBoughtProperty = {
+        $set: {
+          paymentDate: updatedData?.paymentDate,
+          propertyVerificationStatus: updatedData?.propertyVerificationStatus,
+          transactionId: updatedData?.transactionId,
+        },
+      };
+      const result = await propertyBoughtCollection.updateOne(
+        filter,
+        updatedBoughtProperty,
+        options
+      );
+      res.send(result);
+    });
+
     ///////////     PAYMENT     //////////
 
     app.post("/create-payment-intent", async (req, res) => {

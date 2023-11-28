@@ -117,6 +117,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/properties/advertiseProperty", async (req, res) => {
+      const query = { isAdvertiseProperty: true };
+      const result = await propertyCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/property/details/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -271,9 +277,11 @@ async function run() {
       "/single-property-reviews/:reviewedPropertyId",
       async (req, res) => {
         const reviewedPropertyId = req.params.reviewedPropertyId;
+        console.log(reviewedPropertyId);
         const query = {
           reviewedPropertyId,
         };
+        console.log("HIT:", "/single-property-reviews/");
         const result = await reviewCollection.find(query).toArray();
         res.send(result);
       }

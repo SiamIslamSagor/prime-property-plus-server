@@ -130,6 +130,12 @@ async function run() {
       res.send(result);
     });
 
+    // get all user
+    app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
     // is admin checker
     app.get("/users/admin/:email", verifyToken, async (req, res) => {
       console.log(" HIT: /users/admin/:email");

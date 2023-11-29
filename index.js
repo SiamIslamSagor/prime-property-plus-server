@@ -108,6 +108,27 @@ async function run() {
       next();
     };
 
+    // admin verify middleware
+    const verifyAgent = async (req, res, next) => {
+      // get decoded email
+      const email = req.decodedToken?.email;
+      // create query
+      const query = { email: email };
+      // find user by there query
+      const user = await userCollection.findOne(query);
+      // get user role
+      const isAgent = user?.role === "agent";
+      // if user role not agent, then return
+      console.log(" HIT: verify agent middleware");
+
+      if (!isAgent) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      console.log("agent verified");
+      // if all ok, then next()
+      next();
+    };
+
     ///////////     USERS     //////////
 
     // create user
@@ -213,6 +234,21 @@ async function run() {
       );
       res.send(result);
     });
+
+    app.get(
+      "/properties/agent/:email",
+      verifyToken,
+      verifyAgent,
+      async (req, res) => {
+        const email = req.params.email;
+        if (email !== req?.decodedToken?.email) {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+        const query = { agentEmail: email };
+        const result = await propertyCollection.find(query).toArray();
+        res.send(result);
+      }
+    );
 
     ///////////     wish LIST     //////////
 

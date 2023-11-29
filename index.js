@@ -177,6 +177,11 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/properties/all", verifyToken, verifyAdmin, async (req, res) => {
+      const result = await propertyCollection.find().toArray();
+      res.send(result);
+    });
+
     app.get("/properties/advertiseProperty", async (req, res) => {
       const query = { isAdvertiseProperty: true };
       const result = await propertyCollection.find(query).toArray();
@@ -211,6 +216,9 @@ async function run() {
     // get wish list item by user email
     app.get("/wish-list/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
+      if (email !== req?.decodedToken?.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       const query = { requesterEmail: email };
       console.log(query);
       const result = await wishListCollection.find(query).toArray();
@@ -246,6 +254,9 @@ async function run() {
 
     app.get("/property-bought/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
+      if (email !== req?.decodedToken?.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       const query = { buyerEmail: email };
       const result = await propertyBoughtCollection.find(query).toArray();
       res.send(result);
@@ -315,9 +326,12 @@ async function run() {
     });
 
     // get single review by user email
-    app.get("/reviews/:email", async (req, res) => {
+    app.get("/reviews/:email", verifyToken, async (req, res) => {
       console.log("trigged single review");
       const email = req.params.email;
+      if (email !== req?.decodedToken?.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       const query = { reviewerEmail: email };
       const result = await reviewCollection.find(query).toArray();
       res.send(result);
@@ -332,7 +346,7 @@ async function run() {
       res.send(result);
     });
 
-    // get single review by there title
+    // get single review by there id
     app.get(
       "/single-property-reviews/:reviewedPropertyId",
       async (req, res) => {
@@ -350,10 +364,10 @@ async function run() {
     ///////////////////////////////////////
     // TODO : comment this code block
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    /* await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    ); */
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();

@@ -71,7 +71,7 @@ async function run() {
 
     // token verify middleware
     const verifyToken = (req, res, next) => {
-      const tokenWithBearer = req.headers.Authorization;
+      const tokenWithBearer = req?.headers?.authorization;
       console.log("inside verifyToken middleware //////=>", tokenWithBearer);
       if (!tokenWithBearer) {
         return res.status(401).send({ message: "Unauthorized access" });
@@ -82,8 +82,28 @@ async function run() {
           return res.status(401).send({ message: "unauthorized access" });
         }
         req.decodedToken = decoded;
+        console.log("decoded email:", decoded.email);
         next();
       });
+    };
+
+    // admin verify middleware
+    const verifyAdmin = async (req, res, next) => {
+      // get decoded email
+      const email = req.decodedToken?.email;
+      // create query
+      const query = { email: email };
+      // find user by there query
+      const user = await userCollection.findOne(query);
+      // get user role
+      const isAdmin = user?.role === "admin";
+      // if user role not admin, then return
+      if (!isAdmin) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      console.log("admin verified");
+      // if all ok, then next()
+      next();
     };
 
     ///////////     USERS     //////////
@@ -108,6 +128,26 @@ async function run() {
       res.send(result);
     });
 
+    // is admin checker
+    app.get(
+      "/users/admin/:email",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const email = req?.params?.email;
+        if (email !== req?.decodedToken?.email) {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+        const query = { email: email };
+        const user = await userCollection.findOne(query);
+        let admin = false;
+        if (user) {
+          admin = user?.role === "admin";
+        }
+        res.send({ admin });
+      }
+    );
+
     ///////////     PROPERTY     //////////
 
     // public get
@@ -123,7 +163,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/property/details/:id", async (req, res) => {
+    app.get("/property/details/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await propertyCollection.findOne(query);
@@ -133,7 +173,7 @@ async function run() {
     ///////////     wish LIST     //////////
 
     // add to wish list
-    app.post("/wish-list", async (req, res) => {
+    app.post("/wish-list", verifyToken, async (req, res) => {
       const info = req.body;
       console.log("wish List info:::>", info);
       const query = { propertyId: info?.propertyId };
@@ -149,7 +189,7 @@ async function run() {
     });
 
     // get wish list item by user email
-    app.get("/wish-list/:email", async (req, res) => {
+    app.get("/wish-list/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { requesterEmail: email };
       console.log(query);
@@ -158,7 +198,7 @@ async function run() {
     });
 
     // get single wish list item by wishList _id
-    app.get("/wish-list-item/:id", async (req, res) => {
+    app.get("/wish-list-item/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       console.log(query);
@@ -166,7 +206,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/wish-list-item/delete/:id", async (req, res) => {
+    app.delete("/wish-list-item/delete/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       console.log(query);
@@ -175,7 +215,7 @@ async function run() {
     });
 
     ///////////     PROPERTY BOUGHT     //////////
-    app.post("/property-bought", async (req, res) => {
+    app.post("/property-bought", verifyToken, async (req, res) => {
       const boughtPropertyInfo = req.body;
       console.log(boughtPropertyInfo);
       const result = await propertyBoughtCollection.insertOne(
@@ -184,21 +224,21 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/property-bought/:email", async (req, res) => {
+    app.get("/property-bought/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { buyerEmail: email };
       const result = await propertyBoughtCollection.find(query).toArray();
       res.send(result);
     });
 
-    app.get("/bought-property/:id", async (req, res) => {
+    app.get("/bought-property/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await propertyBoughtCollection.findOne(query);
       res.send(result);
     });
 
-    app.patch("/property/bought/:id", async (req, res) => {
+    app.patch("/property/bought/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const updatedData = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -221,7 +261,7 @@ async function run() {
 
     ///////////     PAYMENT     //////////
 
-    app.post("/create-payment-intent", async (req, res) => {
+    app.post("/create-payment-intent", verifyToken, async (req, res) => {
       // get price
       const { price } = req.body;
       // calculate price in coin
@@ -242,7 +282,7 @@ async function run() {
 
     ///////////     REVIEWS     //////////
 
-    app.post("/reviews/add", async (req, res) => {
+    app.post("/reviews/add", verifyToken, async (req, res) => {
       const data = req.body;
       const result = await reviewCollection.insertOne(data);
       res.send(result);
@@ -264,7 +304,7 @@ async function run() {
     });
 
     // delete single review by user email
-    app.delete("/reviews/delete/:id", async (req, res) => {
+    app.delete("/reviews/delete/:id", verifyToken, async (req, res) => {
       console.log("trigged single delete review api");
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };

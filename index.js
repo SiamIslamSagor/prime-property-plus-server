@@ -98,6 +98,8 @@ async function run() {
       // get user role
       const isAdmin = user?.role === "admin";
       // if user role not admin, then return
+      console.log(" HIT: verify admin middleware");
+
       if (!isAdmin) {
         return res.status(403).send({ message: "forbidden access" });
       }
@@ -129,24 +131,36 @@ async function run() {
     });
 
     // is admin checker
-    app.get(
-      "/users/admin/:email",
-      verifyToken,
-      verifyAdmin,
-      async (req, res) => {
-        const email = req?.params?.email;
-        if (email !== req?.decodedToken?.email) {
-          return res.status(403).send({ message: "forbidden access" });
-        }
-        const query = { email: email };
-        const user = await userCollection.findOne(query);
-        let admin = false;
-        if (user) {
-          admin = user?.role === "admin";
-        }
-        res.send({ admin });
+    app.get("/users/admin/:email", verifyToken, async (req, res) => {
+      console.log(" HIT: /users/admin/:email");
+      const email = req?.params?.email;
+      if (email !== req?.decodedToken?.email) {
+        return res.status(403).send({ message: "forbidden access" });
       }
-    );
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let admin = false;
+      if (user) {
+        admin = user?.role === "admin";
+      }
+      res.send({ admin });
+    });
+
+    // is agent checker
+    app.get("/users/agent/:email", verifyToken, async (req, res) => {
+      console.log(" HIT: /users/agent/:email");
+      const email = req?.params?.email;
+      if (email !== req?.decodedToken?.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let agent = false;
+      if (user) {
+        agent = user?.role === "agent";
+      }
+      res.send({ agent });
+    });
 
     ///////////     PROPERTY     //////////
 

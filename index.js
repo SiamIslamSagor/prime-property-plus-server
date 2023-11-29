@@ -195,6 +195,25 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/properties/:id", async (req, res) => {
+      const id = req.params.id;
+      const status = req.body?.status;
+      console.log("patch:", status);
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedProperty = {
+        $set: {
+          propertyVerificationStatus: status,
+        },
+      };
+      const result = await propertyCollection.updateOne(
+        filter,
+        updatedProperty,
+        options
+      );
+      res.send(result);
+    });
+
     ///////////     wish LIST     //////////
 
     // add to wish list

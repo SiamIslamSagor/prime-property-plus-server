@@ -369,22 +369,43 @@ async function run() {
       }
     );
 
-    app.patch("/property-bought/agent/:id", async (req, res) => {
-      const id = req.params.id;
-      const { actionInfo } = req.body;
-      console.log("HIT:/property-bought/agent/:id ", actionInfo.status);
-      const filter = { _id: new ObjectId(id) };
-      console.log(filter);
-      const options = { upsert: true };
-      const updatedBoughtProperty = {
+    app.patch(
+      "/property-bought/agent/:id",
+      verifyToken,
+      verifyAgent,
+      async (req, res) => {
+        const id = req.params.id;
+        const { actionInfo } = req.body;
+        console.log("HIT:/property-bought/agent/:id ", actionInfo.status);
+        const filter = { _id: new ObjectId(id) };
+        console.log(filter);
+        const options = { upsert: true };
+        const updatedBoughtProperty = {
+          $set: {
+            propertyVerificationStatus: actionInfo?.status,
+          },
+        };
+        const result = await propertyBoughtCollection.updateOne(
+          filter,
+          updatedBoughtProperty,
+          options
+        );
+        res.send(result);
+      }
+    );
+
+    app.patch("/property/agent/accepted/rest-reject", async (req, res) => {
+      const filter = req.body;
+
+      console.log("HIT:: /property/agent/accepted/rest-reject", filter);
+      const updateInfoDocs = {
         $set: {
-          propertyVerificationStatus: actionInfo?.status,
+          propertyVerificationStatus: "rejected",
         },
       };
-      const result = await propertyBoughtCollection.updateOne(
+      const result = await propertyBoughtCollection.updateMany(
         filter,
-        updatedBoughtProperty,
-        options
+        updateInfoDocs
       );
       res.send(result);
     });
@@ -510,10 +531,10 @@ async function run() {
     ///////////////////////////////////////
     // TODO : comment this code block
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    /* await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    ); */
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();

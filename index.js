@@ -189,6 +189,43 @@ async function run() {
       res.send({ agent });
     });
 
+    app.patch(
+      "/users/admin/role/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const { data } = req.body;
+        const role = data?.givenRole?.role;
+        const filter = { _id: new ObjectId(id) };
+        const options = { upsert: true };
+        const updatedUserRole = {
+          $set: {
+            role: role,
+          },
+        };
+        const result = await userCollection.updateOne(
+          filter,
+          updatedUserRole,
+          options
+        );
+        res.send(result);
+      }
+    );
+
+    app.delete(
+      "/users/admin/delete/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        console.log("delete this query: ", query);
+        const result = await userCollection.deleteOne(query);
+        res.send(result);
+      }
+    );
+
     ///////////     PROPERTY     //////////
 
     // public get

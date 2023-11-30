@@ -250,6 +250,34 @@ async function run() {
       }
     );
 
+    app.put(
+      "/property/agent/update/:id",
+      verifyToken,
+      verifyAgent,
+      async (req, res) => {
+        const id = req.params.id;
+        const updatedInfo = req.body;
+        console.log("HIT: /property/agent/update/:id");
+        const filter = { _id: new ObjectId(id) };
+        const updatedPropertyDoc = {
+          $set: {
+            propertyImg: updatedInfo.propertyImg,
+            propertyTitle: updatedInfo.propertyTitle,
+            propertyLocation: updatedInfo.propertyLocation,
+            propertyPriceRange: updatedInfo.propertyPriceRange,
+            locationDetails: updatedInfo.locationDetails,
+            propertyFeatures: updatedInfo.propertyFeatures,
+            propertyBeauty: updatedInfo.propertyBeauty,
+          },
+        };
+        const result = await propertyCollection.updateOne(
+          filter,
+          updatedPropertyDoc
+        );
+        res.send(result);
+      }
+    );
+
     ///////////     wish LIST     //////////
 
     // add to wish list
@@ -419,10 +447,10 @@ async function run() {
     ///////////////////////////////////////
     // TODO : comment this code block
     // Send a ping to confirm a successful connection
-    /* await client.db("admin").command({ ping: 1 });
+    await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
-    ); */
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();

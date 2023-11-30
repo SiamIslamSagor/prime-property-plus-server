@@ -371,13 +371,14 @@ async function run() {
 
     app.patch("/property-bought/agent/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+      const { actionInfo } = req.body;
+      console.log("HIT:/property-bought/agent/:id ", actionInfo.status);
       const filter = { _id: new ObjectId(id) };
       console.log(filter);
       const options = { upsert: true };
       const updatedBoughtProperty = {
         $set: {
-          propertyVerificationStatus: "accepted",
+          propertyVerificationStatus: actionInfo?.status,
         },
       };
       const result = await propertyBoughtCollection.updateOne(

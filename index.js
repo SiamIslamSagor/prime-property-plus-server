@@ -351,6 +351,43 @@ async function run() {
     });
 
     ///////////     PROPERTY BOUGHT     //////////
+
+    // get wish list item by user email
+    app.get(
+      "/property-bought/agent/:email",
+      verifyToken,
+      verifyAgent,
+      async (req, res) => {
+        const email = req.params.email;
+        if (email !== req?.decodedToken?.email) {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+        const query = { agentEmail: email };
+        console.log(query);
+        const result = await propertyBoughtCollection.find(query).toArray();
+        res.send(result);
+      }
+    );
+
+    app.patch("/property-bought/agent/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      console.log(filter);
+      const options = { upsert: true };
+      const updatedBoughtProperty = {
+        $set: {
+          propertyVerificationStatus: "accepted",
+        },
+      };
+      const result = await propertyBoughtCollection.updateOne(
+        filter,
+        updatedBoughtProperty,
+        options
+      );
+      res.send(result);
+    });
+
     app.post("/property-bought", verifyToken, async (req, res) => {
       const boughtPropertyInfo = req.body;
       console.log(boughtPropertyInfo);

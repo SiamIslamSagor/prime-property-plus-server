@@ -394,21 +394,26 @@ async function run() {
       }
     );
 
-    app.patch("/property/agent/accepted/rest-reject", async (req, res) => {
-      const filter = req.body;
+    app.patch(
+      "/property/agent/accepted/rest-reject",
+      verifyToken,
+      verifyAgent,
+      async (req, res) => {
+        const filter = req.body;
 
-      console.log("HIT:: /property/agent/accepted/rest-reject", filter);
-      const updateInfoDocs = {
-        $set: {
-          propertyVerificationStatus: "rejected",
-        },
-      };
-      const result = await propertyBoughtCollection.updateMany(
-        filter,
-        updateInfoDocs
-      );
-      res.send(result);
-    });
+        console.log("HIT:: /property/agent/accepted/rest-reject", filter);
+        const updateInfoDocs = {
+          $set: {
+            propertyVerificationStatus: "rejected",
+          },
+        };
+        const result = await propertyBoughtCollection.updateMany(
+          filter,
+          updateInfoDocs
+        );
+        res.send(result);
+      }
+    );
 
     app.post("/property-bought", verifyToken, async (req, res) => {
       const boughtPropertyInfo = req.body;
@@ -418,6 +423,24 @@ async function run() {
       );
       res.send(result);
     });
+
+    app.get(
+      "/property-bought/agent/sold/:email",
+      verifyToken,
+      verifyAgent,
+      async (req, res) => {
+        const email = req.params.email;
+        if (email !== req?.decodedToken?.email) {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+        const query = {
+          agentEmail: email,
+          propertyVerificationStatus: "bought",
+        };
+        const result = await propertyBoughtCollection.find(query).toArray();
+        res.send(result);
+      }
+    );
 
     app.get("/property-bought/:email", verifyToken, async (req, res) => {
       const email = req.params.email;

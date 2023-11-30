@@ -52,6 +52,10 @@ async function run() {
       .db("primePropertyPulse")
       .collection("propertyBought");
 
+    const advertiseCollection = client
+      .db("primePropertyPulse")
+      .collection("advertise");
+
     ///////////////////////////////////
     ///////////     API     //////////
     ///////////////////////////////////
@@ -251,8 +255,7 @@ async function run() {
     );
 
     app.get("/properties/advertiseProperty", async (req, res) => {
-      const query = { isAdvertiseProperty: true };
-      const result = await propertyCollection.find(query).toArray();
+      const result = await advertiseCollection.find().toArray();
       res.send(result);
     });
 
@@ -337,6 +340,14 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await propertyCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.delete("/properties/admin/fraud/delete/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { agentEmail: email };
+      console.log("///////////fraud remove////////////////");
+      const result = await propertyCollection.deleteMany(query);
       res.send(result);
     });
 

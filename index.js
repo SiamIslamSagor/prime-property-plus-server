@@ -203,6 +203,16 @@ async function run() {
       res.send(result);
     });
 
+    app.get(
+      "/properties/agent/all",
+      verifyToken,
+      verifyAgent,
+      async (req, res) => {
+        const result = await propertyCollection.find().toArray();
+        res.send(result);
+      }
+    );
+
     app.get("/properties/advertiseProperty", async (req, res) => {
       const query = { isAdvertiseProperty: true };
       const result = await propertyCollection.find(query).toArray();
@@ -277,6 +287,13 @@ async function run() {
         res.send(result);
       }
     );
+
+    app.delete("/property/agent/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await propertyCollection.deleteOne(query);
+      res.send(result);
+    });
 
     ///////////     wish LIST     //////////
 

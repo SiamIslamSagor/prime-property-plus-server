@@ -288,6 +288,14 @@ async function run() {
       }
     );
 
+    app.post("/properties/agent/add", async (req, res) => {
+      const newProperty = req.body;
+      console.log("HIT::: /properties/agent/add");
+      console.log(newProperty);
+      const result = await propertyCollection.insertOne(newProperty);
+      res.send(result);
+    });
+
     app.delete("/property/agent/delete/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -301,14 +309,14 @@ async function run() {
     app.post("/wish-list", verifyToken, async (req, res) => {
       const info = req.body;
       console.log("wish List info:::>", info);
-      const query = { propertyId: info?.propertyId };
+      /* const query = { propertyId: info?.propertyId };
       console.log("checking query for wish List:::>", query);
       const isExistInfo = await wishListCollection.findOne(query);
       if (isExistInfo) {
         return res.send({
           message: "this property you have already added in you wish list.",
         });
-      }
+      } */
       const result = await wishListCollection.insertOne(info);
       res.send(result);
     });
